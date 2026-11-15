@@ -36,7 +36,7 @@ countdown:
 
 <p class="big">But first: find out *where* the time goes</p>
 
-## Today you will learn to
+## In this lesson you will learn to
 
 - **Profile**: find the slow parts with **profvis**
 - **Benchmark**: compare alternatives with **bench**
