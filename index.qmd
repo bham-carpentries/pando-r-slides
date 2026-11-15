@@ -1,6 +1,6 @@
 ---
 title: "Profiling and Optimisation in R"
-subtitle: "Find the slow bits. Make them faster. Check you didn't break anything."
+subtitle: "Find slow code. Make it faster. Check you didn't break anything."
 format:
   revealjs:
     theme: [default, custom.scss]
@@ -12,6 +12,10 @@ format:
     highlight-style: github
     link-external-newwindow: true
     footer: "[bham-carpentries.github.io/pando-r](https://bham-carpentries.github.io/pando-r/)"
+countdown:
+  font_size: 1.5em
+  color_running_background: "#b5541b"
+  color_running_text: "#ffffff"
 ---
 
 ## Course website
@@ -19,7 +23,7 @@ format:
 <p class="big">[bham-carpentries.github.io/pando-r](https://bham-carpentries.github.io/pando-r/)</p>
 
 - All the material is there: follow along, catch up, revisit later
-- The code is live-coded: type along with me
+- The code is live-coded (not shown on these slides): type along with me
 
 ## Why optimise?
 
@@ -42,8 +46,13 @@ format:
 ## Setup check
 
 ```r
-install.packages(c("profvis", "bench", "tinytest", "futurize", "tictoc"))
-install.packages(c("ggplot2", "ggbeeswarm", "tidyr", "future.apply"))
+install.packages(
+  c("profvis", "bench", "tinytest", "futurize", "tictoc")
+)
+
+install.packages(
+  c("ggplot2", "ggbeeswarm", "tidyr", "future.apply")
+)
 
 install.packages("remotes")
 remotes::install_github("csgillespie/efficient",
@@ -110,7 +119,7 @@ A good test case is:
 
 ## Plan your profiling {.discussion}
 
-<span class="timing">5 min</span>
+{{< countdown minutes=5 id="timer-1" >}}
 
 Think of an R project you've worked on.
 
@@ -135,7 +144,7 @@ A **sampling profiler**: every few milliseconds it pauses and records
 
 ## Call stack {.exercise}
 
-<span class="timing">5 min</span>
+{{< countdown minutes=5 id="timer-2" >}}
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -189,11 +198,11 @@ profvis(top_level())
 
 ![](images/memory-profiling.png){fig-alt="profvis output for a loop that grows a vector with c(), showing large memory allocation and time in <GC>."}
 
-`<GC>` = garbage collector: lots of short-lived objects
+`<GC>` = garbage collector
 
 ## Monopoly {.exercise}
 
-<span class="timing">5 min</span>
+{{< countdown minutes=5 id="timer-3" >}}
 
 ```r
 library(efficient)
@@ -204,7 +213,7 @@ Which parts of the code are slow?
 
 ## Travelling salesperson {.exercise}
 
-<span class="timing">10 min</span>
+{{< countdown minutes=10 id="timer-4" >}}
 
 Download [travelling-salesperson.R](https://bham-carpentries.github.io/pando-r/files/travelling-salesperson.R)
 
@@ -246,7 +255,7 @@ Which are most useful for picking the best expression? Why?
 
 ## Square roots {.exercise}
 
-<span class="timing">5 min</span>
+{{< countdown minutes=5 id="timer-5" >}}
 
 How will these rank on speed? Check with `bench::mark()`.
 
@@ -284,7 +293,7 @@ What does "big" mean for your data?
 
 ## `gl()` {.exercise}
 
-<span class="timing">5 min</span>
+{{< countdown minutes=5 id="timer-6" >}}
 
 `gl(n, k)`: a factor with `n` levels, each repeated `k` times
 
@@ -342,7 +351,7 @@ a <- 1L
 :::
 ::::
 
-## R's secret weapon
+## R is built on compiled code
 
 Much of R (and packages like **dplyr** and **data.table**) is written in C, C++ or Fortran
 
@@ -362,7 +371,7 @@ Much of R (and packages like **dplyr** and **data.table**) is written in C, C++ 
 
 ## `expect_*()` {.exercise}
 
-<span class="timing">10 min</span>
+{{< countdown minutes=10 id="timer-7" >}}
 
 ```r
 is_bigger <- function(a, b) {
@@ -411,7 +420,7 @@ How many function calls does the loop make?
 
 ## Loop vs vector {.exercise}
 
-<span class="timing">10 min</span>
+{{< countdown minutes=10 id="timer-8" >}}
 
 Use `bench::mark()` to compare `x <- x + 1` with the `for` loop.
 
@@ -429,7 +438,7 @@ Work on whole vectors, not individual elements
 
 ## Variance {.exercise}
 
-<span class="timing">10 min</span>
+{{< countdown minutes=10 id="timer-9" >}}
 
 Write a vectorised `variance()` function:
 
@@ -457,7 +466,14 @@ Why is `var()` faster?
 | `sapply()` | elements of a list/vector | simplified (if possible) |
 | `vapply()` | elements of a list/vector | type you specify: safer, faster |
 
-<p class="muted">For row/column sums and means: `rowSums()`, `colMeans()`, ...</p>
+## Faster specialised options
+
+For numeric matrices and data frames, specialised functions are faster than `apply()`
+
+- `rowSums(mat)` (instead of `apply(mat, 1, sum)`)
+- `colSums()`
+- `rowMeans()`
+- `colMeans()`
 
 ## Faster common operations
 
@@ -502,7 +518,7 @@ R copies an object only when you **modify** one that has **more than one name**
 - Reuse names: `x <- x + 1`
 - Don't save intermediate results you don't need
 - `rm()` large objects you're finished with
-- **Cache**: compute `sd(x)` once, reuse it
+- Cache variables: compute once, then reuse
 
 ## Use the simplest data structure
 
@@ -520,7 +536,7 @@ R copies an object only when you **modify** one that has **more than one name**
 
 ## Growing vectors {.exercise}
 
-<span class="timing">10 min</span>
+{{< countdown minutes=10 id="timer-10" >}}
 
 `grow(n)` · `pre_allocate(n)` · `direct(n)`
 
@@ -530,7 +546,7 @@ R copies an object only when you **modify** one that has **more than one name**
 
 ## Monopoly revisited {.exercise}
 
-<span class="timing">20 min</span>
+{{< countdown minutes=20 id="timer-11" >}}
 
 1. Copy `View(move_square)` into `move_square2()`, speed it up
 2. Benchmark with this, then compare `profvis()` for both:
@@ -599,7 +615,7 @@ Use `copy()` if you need an independent table
 
 ## Speed up a loop {.exercise}
 
-<span class="timing">10 min</span>
+{{< countdown minutes=10 id="timer-12" >}}
 
 ```r
 flag_high <- function(d, threshold = 0.9) {
@@ -641,7 +657,10 @@ Write a version with no loop. How much faster is it? How much less memory?
 - **Tight memory**: `data.table` or avoid copying large columns
 - **Mix and match**: converting is cheap
 
-<p class="muted">**dtplyr**: write dplyr, run data.table</p>
+::: {.callout-tip}
+## **dtplyr**
+Write dplyr, run data.table
+:::
 
 ## Your own work {.discussion}
 
@@ -682,7 +701,7 @@ ys <- lapply(xs, slow_fcn) |> futurize()  # parallel
 
 ## Snakes and ladders {.exercise}
 
-<span class="timing">5 min</span>
+{{< countdown minutes=5 id="timer-13" >}}
 
 Parallelise this, and compare run times with **tictoc**:
 
@@ -765,4 +784,4 @@ Rewrite the bottleneck in a compiled language, call it from R
 
 . . .
 
-<p class="muted">[bham-carpentries.github.io/pando-r](https://bham-carpentries.github.io/pando-r/)</p>
+<p class="big">[bham-carpentries.github.io/pando-r](https://bham-carpentries.github.io/pando-r/)</p>
